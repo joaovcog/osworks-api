@@ -17,36 +17,57 @@ import com.algaworks.osworks.domain.repository.OrdemServicoRepository;
 
 @Service
 public class GestaoOrdemServicoService {
-	
+
 	@Autowired
 	private OrdemServicoRepository ordemServicoRepository;
-	
+
 	@Autowired
 	private ClienteRepository clienteRepository;
-	
+
 	@Autowired
 	private ComentarioRepository comentarioRepository;
-	
+
 	public OrdemServico criar(OrdemServico ordemServico) {
 		Cliente cliente = clienteRepository.findById(ordemServico.getCliente().getCodigo())
 				.orElseThrow(() -> new NegocioException("Cliente não encontrado."));
-		
+
 		ordemServico.setCliente(cliente);
 		ordemServico.setStatus(StatusOrdemServico.ABERTA);
 		ordemServico.setDataAbertura(OffsetDateTime.now());
-		
+
 		return ordemServicoRepository.save(ordemServico);
 	}
-	
-	public Comentario adicionarComentario(Long codOrdemServico, String descricao) {
-		OrdemServico ordemServico = ordemServicoRepository.findById(codOrdemServico).orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de serviço não encontrada."));
+
+	public void finalizar(Long codOrdemServico) {
+		OrdemServico ordemServico = buscar(codOrdemServico);
 		
+		ordemServico.finalizar();
+		
+		ordemServicoRepository.save(ordemServico);
+	}
+	
+	public void cancelar(Long codOrdemServico) {
+		OrdemServico ordemServico = buscar(codOrdemServico);
+		
+		ordemServico.cancelar();
+		
+		ordemServicoRepository.save(ordemServico);
+	}
+
+	public Comentario adicionarComentario(Long codOrdemServico, String descricao) {
+		OrdemServico ordemServico = buscar(codOrdemServico);
+
 		Comentario comentario = new Comentario();
 		comentario.setDescricao(descricao);
 		comentario.setOrdemServico(ordemServico);
 		comentario.setDataEnvio(OffsetDateTime.now());
-		
+
 		return comentarioRepository.save(comentario);
 	}
 	
+	private OrdemServico buscar(Long codOrdemServico) {
+		return ordemServicoRepository.findById(codOrdemServico)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException("Ordem de serviço não encontrada."));
+	}
+
 }

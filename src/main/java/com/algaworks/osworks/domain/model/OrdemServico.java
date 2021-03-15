@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.groups.ConvertGroup;
 import javax.validation.groups.Default;
 
+import com.algaworks.osworks.domain.exception.NegocioException;
 import com.algaworks.osworks.domain.validation.ValidationGroups;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -121,6 +122,31 @@ public class OrdemServico {
 
 	public void setComentarios(List<Comentario> comentarios) {
 		this.comentarios = comentarios;
+	}
+	
+	public boolean podeSerFinalizada() {
+		return StatusOrdemServico.ABERTA.equals(getStatus());
+	}
+	
+	public boolean podeSerCancelada() {
+		return !StatusOrdemServico.CANCELADA.equals(getStatus());
+	}
+	
+	public void finalizar() {
+		if (!podeSerFinalizada()) {
+			throw new NegocioException("Ordem de serviço não pode ser finalizada.");
+		}
+		
+		setStatus(StatusOrdemServico.FINALIZADA);
+		setDataFinalizacao(OffsetDateTime.now());
+	}
+	
+	public void cancelar() {
+		if (!podeSerCancelada()) {
+			throw new NegocioException("Ordem de serviço não pode ser cancelada.");
+		}
+		
+		setStatus(StatusOrdemServico.CANCELADA);
 	}
 
 	@Override
