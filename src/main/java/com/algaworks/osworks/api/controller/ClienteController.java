@@ -30,7 +30,7 @@ public class ClienteController {
 	private ClienteRepository clienteRepository;
 	
 	@Autowired
-	private CadastroClienteService cadastroClienteService; 
+	private CadastroClienteService cadastroClienteService;
 	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
